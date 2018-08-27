@@ -1,11 +1,13 @@
 package Voyager;
 
+import java.nio.ByteBuffer;
+
 /**
  * A DTO class
  */
 public class Slice {
     private int sliceNum;
-    private byte[] content;
+    private ByteBuffer content;
     private String url;
 
     /**
@@ -15,7 +17,7 @@ public class Slice {
      * @param content  content
      * @param url      web address
      */
-    Slice(int sliceNum, byte[] content, String url) {
+    Slice(int sliceNum, ByteBuffer content, String url) {
         this.sliceNum = sliceNum;
         this.content = content;
         this.url = url;
@@ -30,11 +32,11 @@ public class Slice {
         this.sliceNum = sliceNum;
     }
 
-    public byte[] getContent() {
+    public ByteBuffer getContent() {
         return content;
     }
 
-    public void setContent(byte[] content) {
+    public void setContent(ByteBuffer content) {
         this.content = content;
     }
 

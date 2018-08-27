@@ -10,7 +10,7 @@ import com.datastax.driver.core.exceptions.AlreadyExistsException;
 class CassandraRepo {
     private Cluster cluster;
     private Session session;
-    SlicesDAO slices;
+    SlicesDAOInterface slices;
 
     /**
      * private constructor
@@ -57,8 +57,8 @@ class CassandraRepo {
      */
     private void createTable() {
         String query = "CREATE TABLE slices(slice int, "
-                + "content text, "
-                + "url text , "
+                + "content blob, "
+                + "url text, "
                 + "PRIMARY KEY (slice,url));";
         try {
             session.execute(query);
