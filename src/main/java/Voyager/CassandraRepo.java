@@ -5,7 +5,7 @@ import com.datastax.driver.core.Session;
 import com.datastax.driver.core.exceptions.AlreadyExistsException;
 
 /**
- * a singleton class represents our cassandra data base
+ * A singleton class represents our data base repository
  */
 class CassandraRepo {
     private Cluster cluster;
@@ -13,7 +13,7 @@ class CassandraRepo {
     SlicesDAOInterface slices;
 
     /**
-     * private constructor
+     * Private constructor
      */
     private CassandraRepo() {
         cluster = Cluster.builder().addContactPoint("localhost").build();
@@ -21,6 +21,10 @@ class CassandraRepo {
         slices = new SlicesDAOImpl(session);
         createKeyspace("myks");
         createTable();
+    }
+
+    public boolean isClosed() {
+        return (session.isClosed()&&cluster.isClosed());
     }
 
     /**
@@ -31,7 +35,7 @@ class CassandraRepo {
     }
 
     /**
-     * function to get the only cassandra instance
+     * Function to get the only repository instance
      *
      * @return object of CassandraRepo
      */
@@ -73,64 +77,4 @@ class CassandraRepo {
         session.close();
         cluster.close();
     }
-
-    //    /**
-//     * inserting new slice to db.
-//     *
-//     * @param sliceNum slice id number
-//     * @param content  hex string of the bytes from the slice
-//     * @param url      web address
-//     */
-//    void insert(int sliceNum, String content, String url) {
-//        session.execute("INSERT INTO slices(slice, content , url) VALUES (" + sliceNum + ",'" + content + "','" + url + "')");
-//    }
-
-//    /**
-//     * Select rows by url only
-//     *
-//     * @param url the web address
-//     * @return a ResultSet object, from which we can go over the rows.
-//     */
-//    ResultSet selectByURL(String url) {
-//        return session.execute("SELECT * FROM slices WHERE url='" + url + "' ALLOW FILTERING;");
-//    }
-
-//    /**
-//     * Select rows by url and slice part number
-//     *
-//     * @param url      the web address
-//     * @param sliceNum the slice
-//     * @return a ResultSet object, from which we can go over the rows.
-//     */
-//    ResultSet selectByURLAndSlice(String url, int sliceNum) {
-//        return session.execute("SELECT * FROM slices WHERE url='" + url + "' AND slice=" + sliceNum + " ALLOW FILTERING;");
-//    }
-
-//    /**
-//     * Printing the result
-//     *
-//     * @param resultset object, from which we can go over the rows.
-//     */
-//    void printResult(ResultSet resultset) {
-//        String slice;
-//        String content;
-//        String url;
-//        System.out.println("Result : ");
-//        int r = resultset.getAvailableWithoutFetching();
-//        if (r == 0) {
-//            System.out.println("\nNo slices were found");
-//            return;
-//        }
-//        for (Row row : resultset) {
-//            slice = Integer.toString(row.getInt("slice"));
-//            content = row.getString("content");
-//            url = row.getString("url");
-//            System.out.println();
-//            System.out.println("slice ID : " + slice);
-//            System.out.println("Content is : " + content);
-//            System.out.println("url is : " + url);
-//        }
-//    }
-
-
 }

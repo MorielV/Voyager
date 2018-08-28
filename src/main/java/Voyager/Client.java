@@ -6,17 +6,21 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.net.UnknownHostException;
-import java.nio.ByteBuffer;
 import java.sql.SQLException;
 import java.util.Set;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 class Client {
     private CassandraRepo repo;
     private Base32 base32;
-
+    ExecutorService service;
     private Client() {
         repo = CassandraRepo.getInstance();
         base32 = new Base32();
+        service= Executors.newFixedThreadPool(10);
+
     }
 
     /**
@@ -28,11 +32,12 @@ class Client {
         //can make as private func to get argument , should make a test for it
         final Client client = new Client();
         if (args.length == 2) {
-            if (args[0].equals("put"))                                  //put www.ynet.co.il
-                client.storeWebPage(args[1]);
-            else client.printAllSlicesByUrl(args[1]);                   //get www.ynet.co.il
-        } else if (args.length == 3)                                    //get www.ynet.co.il 0
-            client.printSliceByUrlAndSliceNum(args[1], Integer.parseInt(args[2]));
+            if (args[0].toLowerCase().equals("put"))                                 //put www.ynet.co.il
+                client.storeWebPage(args[1].toLowerCase());
+            else if (args[0].toLowerCase().equals("get"))
+                client.printAllSlicesByUrl(args[1].toLowerCase());                   //get www.ynet.co.il
+        } else if (args.length == 3 && (args[0].toLowerCase().equals("get")))        //get www.ynet.co.il 0
+            client.printSliceByUrlAndSliceNum(args[1].toLowerCase(), Integer.parseInt(args[2]));
         client.exit();
     }
 
@@ -54,6 +59,7 @@ class Client {
             URL url = new URL(urlWithProtocol);            //creating url
             InputStream is = url.openStream();             //opening a input stream to this url
             readInputStreamAndStoreSlices(is, bytesRead, urlAsString);
+            System.out.println("Web Page Stored");
             is.close();
         } catch (UnknownHostException e) {
             System.out.println("Error : Web address does not exist.");
@@ -65,21 +71,25 @@ class Client {
     /**
      * function with a for loop,
      * Every iteration reading from input stream to bytesRead,
-     * copying to new array of size numOfBytes which is the return value of read(...),
-     * and storing a new slice with the new array wrapped by ByteBuffer which is the content of the current slice
+     * sending threads to handle the insert task for us .
      *
      * @param is          input stream from which we read
      * @param bytesRead   bytes array of length limit that we use to store bytes read from input stream
      * @param urlAsString url as a string
-     * @throws IOException
-     * @throws SQLException
+     * @throws IOException  .
+     * @throws SQLException .
      */
     private void readInputStreamAndStoreSlices(InputStream is, byte[] bytesRead, String urlAsString) throws IOException, SQLException {
         int numOfBytes;
         for (int i = 0; ((numOfBytes = is.read(bytesRead, 0, bytesRead.length)) != -1); i++) {
-            byte[] temp = new byte[numOfBytes];
-            System.arraycopy(bytesRead, 0, temp, 0, numOfBytes);
-            repo.slices.insert(new Slice(i, ByteBuffer.wrap(temp), urlAsString));
+            service.execute(new InsertTask(bytesRead, numOfBytes, repo, urlAsString, i));
+            bytesRead = new byte[bytesRead.length]; //create a new object with different address for the next thread
+        }
+        service.shutdown();
+        try {
+            service.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS);
+        } catch (InterruptedException e) {
+            System.out.println("Thread interrupted!");
         }
     }
 
@@ -110,6 +120,7 @@ class Client {
 
     /**
      * printing a single slice
+     *
      * @param slice DTO object
      */
     private void printSlice(Slice slice) {

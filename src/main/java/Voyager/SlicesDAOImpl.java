@@ -35,7 +35,7 @@ public class SlicesDAOImpl implements SlicesDAOInterface {
      */
     @Override
     public Slice getSliceByUrlAndSliceNum(String url, int sliceNum) {
-        //SQL injection
+        // Avoiding SQL injection
         PreparedStatement statement =session.prepare("SELECT * FROM slices WHERE url = ? AND slice = ?");
         BoundStatement bound = new BoundStatement(statement);
         bound.setString(0, url);
@@ -61,7 +61,7 @@ public class SlicesDAOImpl implements SlicesDAOInterface {
         bound.setString(0, url);
         ResultSet resultSet = session.execute(bound);
         return getSliceSetFromResult(resultSet,url);
-    }
+}
 
     /**
      * get a slice set from result,
