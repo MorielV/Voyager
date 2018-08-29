@@ -1,4 +1,4 @@
-package Voyager;
+package WebDownloaderClient;
 
 import org.apache.commons.codec.binary.Base32;
 
@@ -15,11 +15,12 @@ import java.util.concurrent.TimeUnit;
 class Client {
     private CassandraRepo repo;
     private Base32 base32;
-    ExecutorService service;
+    private ExecutorService service;
+
     private Client() {
         repo = CassandraRepo.getInstance();
         base32 = new Base32();
-        service= Executors.newFixedThreadPool(10);
+        service = Executors.newFixedThreadPool(10);
 
     }
 
@@ -29,25 +30,33 @@ class Client {
      * @param args program argument
      */
     public static void main(String[] args) {
-        //can make as private func to get argument , should make a test for it
         final Client client = new Client();
+        try {
+            checkArgsAndCallProperFunction(client, args);
+        }catch (Exception e){
+            //bad input do nothing
+        }
+        client.exit();
+    }
+
+    private static void checkArgsAndCallProperFunction(Client client, String[] args) {
         if (args.length == 2) {
             if (args[0].toLowerCase().equals("put"))                                 //put www.ynet.co.il
                 client.storeWebPage(args[1].toLowerCase());
             else if (args[0].toLowerCase().equals("get"))
                 client.printAllSlicesByUrl(args[1].toLowerCase());                   //get www.ynet.co.il
-        } else if (args.length == 3 && (args[0].toLowerCase().equals("get")))        //get www.ynet.co.il 0
+        } else if (args.length == 3 && (args[0].toLowerCase().equals("get"))) {      //get www.ynet.co.il 0
             client.printSliceByUrlAndSliceNum(args[1].toLowerCase(), Integer.parseInt(args[2]));
-        client.exit();
+        }
     }
 
     /**
      * Storing a web page in cassandra
      */
     private void storeWebPage(String urlAsString) {
-        String urlWithProtocol;                             // will be url with protocol
-        final int limit = 10240;                            // this is 10kb in binary.
-        final byte[] bytesRead = new byte[limit];           // array of bytes that we read from input stream
+        String urlWithProtocol;
+        final int limit = 10240;
+        final byte[] bytesRead = new byte[limit];
 
         //making url with protocol if not mentioned
         if (!urlAsString.startsWith("http://") && !urlAsString.startsWith("https://"))
@@ -56,8 +65,8 @@ class Client {
             urlWithProtocol = urlAsString;
 
         try {
-            URL url = new URL(urlWithProtocol);            //creating url
-            InputStream is = url.openStream();             //opening a input stream to this url
+            URL url = new URL(urlWithProtocol);
+            InputStream is = url.openStream();
             readInputStreamAndStoreSlices(is, bytesRead, urlAsString);
             System.out.println("Web Page Stored");
             is.close();

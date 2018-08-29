@@ -1,4 +1,4 @@
-package Voyager;
+package WebDownloaderClient;
 
 import com.datastax.driver.core.*;
 

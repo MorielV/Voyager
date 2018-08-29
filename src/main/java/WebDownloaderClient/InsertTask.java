@@ -1,4 +1,4 @@
-package Voyager;
+package WebDownloaderClient;
 
 import java.nio.ByteBuffer;
 import java.sql.SQLException;

@@ -1,4 +1,4 @@
-package Voyager;
+package WebDownloaderClient;
 
 import java.sql.SQLException;
 import java.util.Set;

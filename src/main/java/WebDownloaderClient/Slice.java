@@ -1,4 +1,4 @@
-package Voyager;
+package WebDownloaderClient;
 
 import java.nio.ByteBuffer;
 
@@ -22,29 +22,28 @@ public class Slice {
         this.content = content;
         this.url = url;
     }
-    //Getters and Setters
 
-    public int getSliceNum() {
+    int getSliceNum() {
         return sliceNum;
     }
 
-    public void setSliceNum(int sliceNum) {
+    void setSliceNum(int sliceNum) {
         this.sliceNum = sliceNum;
     }
 
-    public ByteBuffer getContent() {
+    ByteBuffer getContent() {
         return content;
     }
 
-    public void setContent(ByteBuffer content) {
+    void setContent(ByteBuffer content) {
         this.content = content;
     }
 
-    public String getUrl() {
+    String getUrl() {
         return url;
     }
 
-    public void setUrl(String url) {
+    void setUrl(String url) {
         this.url = url;
     }
 }
