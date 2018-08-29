@@ -1,7 +1,7 @@
 Running Instructions -
 
 main method is in Client.java .
-start the program with  argument. 
+start the program with  arguments. 
 
 arguments examples:
 
