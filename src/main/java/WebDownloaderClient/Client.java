@@ -40,7 +40,6 @@ class Client {
     }
 
     private static void checkArgsAndCallProperFunction(Client client, String[] args) {
-        //comment
         if (args.length == 2) {
             if (args[0].toLowerCase().equals("put"))                                 //put www.ynet.co.il
                 client.storeWebPage(args[1].toLowerCase());
